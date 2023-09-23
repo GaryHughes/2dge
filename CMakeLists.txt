@@ -22,6 +22,7 @@ include_directories(
 
 link_directories(
     "/usr/local/lib"
+    "/opt/homebrew/lib"
 )
 
 enable_testing()
