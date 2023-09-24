@@ -3,6 +3,7 @@
         {
             "includePath": [
                 "/opt/homebrew/include",
+                "/opt/homebrew/include/lua5.4",
                 "${workspaceFolder}/thirdparty"
             ],
             "macFrameworkPath": [

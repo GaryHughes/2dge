@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 
-project(crocofix)
+project(2dge)
 
 set(CMAKE_CXX_CLANG_TIDY
     clang-tidy;
@@ -30,5 +30,7 @@ include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/catch2/contrib")
 include(Catch)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/thirdparty/cmake/sdl2")
 
 add_subdirectory(src)
