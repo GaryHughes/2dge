@@ -1,6 +1,7 @@
 #include "game.hpp"
 #include <iostream>
 #include <SDL2/SDL_image.h>
+#include <glm/glm.hpp>
 
 namespace dge
 {
@@ -52,11 +53,6 @@ void game::initialise()
     m_is_running = true;
 }
 
-void game::setup()
-{
-
-}
-
 void game::run()
 {
     setup();
@@ -87,9 +83,28 @@ void game::process_input()
 
 }
 
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
+
+void game::setup()
+{
+    playerPosition = glm::vec2(10.0, 20.0);
+    playerVelocity = glm::vec2(100.0, 0.0);
+}
+
 void game::update()
 {
+    int timeToWait = MILLISECONDS_PER_FRAME - (SDL_GetTicks() - millisecondsPreviousFrame);
+    if (timeToWait > 0 && timeToWait <= MILLISECONDS_PER_FRAME) {
+        SDL_Delay(timeToWait);
+    }
 
+    double deltaTime = (SDL_GetTicks() - millisecondsPreviousFrame) / 1000.0;
+
+    millisecondsPreviousFrame = SDL_GetTicks();
+
+    playerPosition.x += playerVelocity.x * deltaTime;
+    playerPosition.y += playerVelocity.y * deltaTime;
 }
 
 void game::render()
@@ -101,7 +116,7 @@ void game::render()
     SDL_Texture* texture = SDL_CreateTextureFromSurface(m_renderer, surface);
     SDL_FreeSurface(surface);
 
-    SDL_Rect dstRect = { 10, 10, 32, 32 };
+    SDL_Rect dstRect = { int(playerPosition.x), int(playerPosition.y), 32, 32 };
     SDL_RenderCopy(m_renderer, texture, nullptr, &dstRect);    
     SDL_DestroyTexture(texture);
 

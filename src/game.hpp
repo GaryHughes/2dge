@@ -6,6 +6,9 @@
 namespace dge
 {
 
+const int FPS = 60;
+const int MILLISECONDS_PER_FRAME = 1000 / FPS;
+
 class game
 {
 public:
@@ -29,6 +32,7 @@ private:
     bool m_is_running = false;
     SDL_Window* m_window = nullptr;
     SDL_Renderer* m_renderer = nullptr;
+    int millisecondsPreviousFrame = 0;
 
 };
 
