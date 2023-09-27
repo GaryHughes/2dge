@@ -1,6 +1,7 @@
 add_executable(game
     main.cpp
     game.cpp game.hpp
+    logger.cpp logger.hpp
 )
 
 find_package(Lua 5.4 REQUIRED)

@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "logger.hpp"
 #include <iostream>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -8,18 +9,19 @@ namespace dge
 
 game::game()
 {
-
+    logger::error("testing");
 }
 
 game::~game()
 {
-
 }
 
 void game::initialise()
 {
+    logger::info("initialise");
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        std::cerr << "Error initialising SDL" << std::endl;
+        logger::error("Error initialising SDL");
         return;
     }
 
@@ -37,14 +39,14 @@ void game::initialise()
                                 SDL_WINDOW_BORDERLESS);
 
     if (m_window == nullptr) {
-        std::cerr << "Error creating SDL window" << std::endl;
+        logger::error("Error creating SDL window");
         return;
     }
 
     m_renderer = SDL_CreateRenderer(m_window, -1, 0);
 
     if (m_renderer == nullptr) {
-        std::cerr << "Error creating SDL renderer" << std::endl;
+        logger::error("Error creating SDL renderer");
         return;
     }
 
