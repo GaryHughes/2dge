@@ -2,6 +2,12 @@ add_executable(game
     main.cpp
     game.cpp game.hpp
     logger.cpp logger.hpp
+    ecs/entity.cpp ecs/entity.hpp
+    ecs/component.cpp ecs/component.hpp
+    ecs/system.cpp ecs/system.hpp
+    ecs/registry.cpp ecs/registry.hpp
+    components/transform_component.hpp
+    systems/movement_system.hpp
 )
 
 find_package(Lua 5.4 REQUIRED)
