@@ -6,6 +6,7 @@ add_executable(game
     ecs/component.cpp ecs/component.hpp
     ecs/system.cpp ecs/system.hpp
     ecs/registry.cpp ecs/registry.hpp
+    ecs/pool.hpp
     components/transform_component.hpp
     systems/movement_system.hpp
 )

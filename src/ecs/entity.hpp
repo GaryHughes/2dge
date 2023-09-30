@@ -15,6 +15,7 @@ public:
     int id() const { return m_id; }
 
     bool operator==(const entity& other) const { return m_id == other.m_id; }
+    bool operator<(const entity& other) const { return m_id < other.m_id; }
 
 private:
 
