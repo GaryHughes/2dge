@@ -15,6 +15,83 @@ namespace dge
 namespace ecs
 {
 
+class entity
+{
+public:
+
+    entity(int id) : m_id(id) {}
+
+    int id() const { return m_id; }
+
+    bool operator==(const entity& other) const { return m_id == other.m_id; }
+    bool operator<(const entity& other) const { return m_id < other.m_id; }
+
+    class registry* registry = nullptr;
+   
+    template<typename ComponentType, typename ... TArgs> 
+    void add_component(TArgs&& ... args);
+
+    template<typename ComponentType> 
+    void remove_component();
+
+    template<typename ComponentType> 
+    bool has_component() const;
+
+    template<typename ComponentType> 
+    ComponentType& get_component();
+
+private:
+
+    int m_id;
+
+};
+
+class system
+{
+public:
+
+    using entity_collection = std::vector<entity>;
+
+    void add(const entity& e)
+    {
+        m_entities.push_back(e);
+    }
+
+    void remove(const entity& e)
+    {
+        m_entities.erase(
+            std::remove_if(
+                m_entities.begin(), 
+                m_entities.end(), 
+                [&] (entity& other) {
+                    return e == other;
+                }
+            ),
+            m_entities.end()
+        );
+    }
+
+    signature component_signature() const { return m_component_signature; }
+    entity_collection& entities() { return m_entities; }
+
+protected:
+
+    template <typename ComponentType> void require_component()
+    {
+        const auto component_id = component<ComponentType>::id();
+        m_component_signature.set(component_id);
+    }
+
+private:
+
+    signature m_component_signature;
+
+    entity_collection m_entities;
+
+};
+
+using system_ptr = std::shared_ptr<system>;
+
 class registry
 {
 public:
@@ -77,7 +154,7 @@ public:
         const auto component_id = component<ComponentType>::id();
         const auto entity_id = e.id();
         std::shared_ptr<pool<ComponentType>> component_pool = std::static_pointer_cast<pool<ComponentType>>(m_component_pools[component_id]);
-        return component_pool[entity_id];
+        return (*component_pool)[entity_id];
     }
 
     template<typename SystemType, typename ... TArgs>
@@ -130,6 +207,30 @@ private:
     std::set<entity> m_destroyed_entities;
 
 };
+
+template<typename ComponentType, typename ... TArgs> 
+void entity::add_component(TArgs&& ... args)
+{
+    registry->add_component<ComponentType>(*this, std::forward<TArgs>(args)...);
+}
+
+template<typename ComponentType> 
+void entity::remove_component()
+{
+    registry->remove_component<ComponentType>(*this);
+}
+
+template<typename ComponentType> 
+bool entity::has_component() const
+{
+    return registry->has_component<ComponentType>(*this);
+} 
+
+template<typename ComponentType> 
+ComponentType& entity::get_component()
+{
+    return registry->get_component<ComponentType>(*this);
+} 
 
 } // ecs
 } // dge

@@ -13,7 +13,7 @@ entity registry::create_entity()
         m_entity_component_signatures.resize(id + 1);
     }
     auto e = entity(id);
-    // e.registry = this;
+    e.registry = this;
     m_created_entities.insert(e);
     logger::info("entity created with id = " + std::to_string(id));
     return e;

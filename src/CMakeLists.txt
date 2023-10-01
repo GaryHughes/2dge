@@ -9,7 +9,9 @@ add_executable(game
     ecs/pool.hpp
     components/transform_component.hpp
     components/rigid_body_component.hpp
+    components/sprite_component.hpp
     systems/movement_system.hpp
+    systems/render_system.hpp
 )
 
 find_package(Lua 5.4 REQUIRED)

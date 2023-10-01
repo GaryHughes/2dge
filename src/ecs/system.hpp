@@ -10,35 +10,35 @@ namespace dge
 namespace ecs
 {
 
-class system
-{
-public:
+// class system
+// {
+// public:
 
-    using entity_collection = std::vector<entity>;
+//     using entity_collection = std::vector<entity>;
 
-    void add(const entity& e);
-    void remove(const entity& e);
+//     void add(const entity& e);
+//     void remove(const entity& e);
 
-    signature component_signature() const { return m_component_signature; }
-    const entity_collection& entities() const { return m_entities; }
+//     signature component_signature() const { return m_component_signature; }
+//     const entity_collection& entities() const { return m_entities; }
 
-protected:
+// protected:
 
-    template <typename ComponentType> void require_component()
-    {
-        const auto component_id = component<ComponentType>::id();
-        m_component_signature.set(component_id);
-    }
+//     template <typename ComponentType> void require_component()
+//     {
+//         const auto component_id = component<ComponentType>::id();
+//         m_component_signature.set(component_id);
+//     }
 
-private:
+// private:
 
-    signature m_component_signature;
+//     signature m_component_signature;
 
-    entity_collection m_entities;
+//     entity_collection m_entities;
 
-};
+// };
 
-using system_ptr = std::shared_ptr<system>;
+// using system_ptr = std::shared_ptr<system>;
 
 } // ecs
 } // dge
