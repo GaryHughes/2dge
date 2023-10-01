@@ -2,6 +2,7 @@
 #define dge_game_hpp
 
 #include <SDL2/SDL.h>
+#include "ecs/registry.hpp"
 
 namespace dge
 {
@@ -33,6 +34,7 @@ private:
     SDL_Window* m_window = nullptr;
     SDL_Renderer* m_renderer = nullptr;
     int millisecondsPreviousFrame = 0;
+    ecs::registry m_registry;
 
 };
 

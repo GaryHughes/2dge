@@ -17,6 +17,32 @@ public:
     bool operator==(const entity& other) const { return m_id == other.m_id; }
     bool operator<(const entity& other) const { return m_id < other.m_id; }
 
+    // class registry* registry = nullptr;
+   
+    // template<typename ComponentType, typename ... TArgs> 
+    // void add_component(TArgs&& ... args)
+    // {
+    //     registry->add_component<ComponentType>(*this, std::forward<TArgs>(args)...);
+    // }
+
+    // template<typename ComponentType> 
+    // void remove_component()
+    // {
+    //     registry->remove_component<ComponentType>(*this);
+    // }
+
+    // template<typename ComponentType> 
+    // bool has_component() const
+    // {
+    //     return registry->has_component<ComponentType>(*this);
+    // } 
+
+    // template<typename ComponentType> 
+    // ComponentType& get_component() const
+    // {
+    //     return registry->get_component<ComponentType>(*this);
+    // } 
+
 private:
 
     int m_id;

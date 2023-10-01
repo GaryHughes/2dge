@@ -38,6 +38,8 @@ private:
 
 };
 
+using system_ptr = std::shared_ptr<system>;
+
 } // ecs
 } // dge
 

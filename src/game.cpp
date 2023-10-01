@@ -1,5 +1,7 @@
 #include "game.hpp"
 #include "logger.hpp"
+#include "components/transform_component.hpp"
+#include "components/rigid_body_component.hpp"
 #include <iostream>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -87,6 +89,10 @@ void game::process_input()
 
 void game::setup()
 {
+    ecs::entity tank = m_registry.create_entity();
+    m_registry.add_component<ecs::transform_component>(tank, glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    m_registry.add_component<ecs::rigid_body_component>(tank, glm::vec2(50.0, 0.0));
+
 }
 
 void game::update()
@@ -100,7 +106,7 @@ void game::update()
 
     millisecondsPreviousFrame = SDL_GetTicks();
 
-   
+    
 }
 
 void game::render()

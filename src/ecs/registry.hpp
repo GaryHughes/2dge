@@ -8,6 +8,7 @@
 #include "entity.hpp"
 #include "pool.hpp"
 #include "system.hpp"
+#include "../logger.hpp"
 
 namespace dge
 {
@@ -32,21 +33,23 @@ public:
         }
 
         if (m_component_pools[component_id] == nullptr) {
-            m_component_pools[component_id] = new pool<ComponentType>();
+            auto p = std::make_shared<pool<ComponentType>>();
+            m_component_pools[component_id] = p;
         }
 
-        // TODO - yuck cast
-        auto* p = pool<ComponentType>(m_component_pools[component_id]);
+        std::shared_ptr<pool<ComponentType>> p = std::static_pointer_cast<pool<ComponentType>>(m_component_pools[component_id]);
     
         if (entity_id >= p->size()) {
             p->resize(m_entity_count);
         }
 
-        component<ComponentType> c(std::forward<TArgs>(args)...);
+        ComponentType c(std::forward<TArgs>(args)...);
 
         p->set(entity_id, c);
 
         m_entity_component_signatures[entity_id].set(component_id);
+
+        logger::info("component id = " + std::to_string(component_id) + " was added to entity id = " + std::to_string(entity_id));
     }
 
     template<typename ComponentType>
@@ -56,6 +59,7 @@ public:
         const auto entity_id = e.id();
         // TODO - range check
         m_entity_component_signatures[entity_id].set(component_id, false);
+        logger::info("component id = " + std::to_string(component_id) + " was removed from entity id = " + std::to_string(entity_id));
     }
 
     template<typename ComponentType>
@@ -67,10 +71,19 @@ public:
         return m_entity_component_signatures[entity_id].test(component_id);
     }
 
+    template<typename ComponentType>
+    ComponentType& get_component(const entity& e)
+    {
+        const auto component_id = component<ComponentType>::id();
+        const auto entity_id = e.id();
+        std::shared_ptr<pool<ComponentType>> component_pool = std::static_pointer_cast<pool<ComponentType>>(m_component_pools[component_id]);
+        return component_pool[entity_id];
+    }
+
     template<typename SystemType, typename ... TArgs>
     void add_system(TArgs&& ... args)
     {
-        auto* new_system = new SystemType(std::forward<TArgs>(args)...);
+        system_ptr new_system = std::make_shared<SystemType>(std::forward<TArgs>(args)...);
         m_systems.insert(std::make_pair(std::type_index(typeid(SystemType)), new_system));
     }
 
@@ -96,16 +109,16 @@ public:
 
     void update();
 
-    void add_entity_to_system(entity e);
+    void add_entity_to_systems(entity e);
 
 private:
 
     // vector index == component.id
     // pool index == entity.id
-    using component_pool_collection = std::vector<pool_base*>;
+    using component_pool_collection = std::vector<pool_base_ptr>;
     // vector index == entity.id
     using signature_collection = std::vector<signature>;
-    using system_collection = std::unordered_map<std::type_index, system*>;
+    using system_collection = std::unordered_map<std::type_index, system_ptr>;
 
     component_pool_collection m_component_pools;
     signature_collection m_entity_component_signatures;

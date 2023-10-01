@@ -12,12 +12,15 @@ class pool_base
 {
 public:
 
+    pool_base() = default;
     virtual ~pool_base() {}
 
 };
 
+using pool_base_ptr = std::shared_ptr<pool_base>;
+
 template<typename T>
-class pool : pool_base
+class pool : public pool_base
 {
 public:
 
