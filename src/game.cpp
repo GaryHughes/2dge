@@ -14,7 +14,6 @@ namespace dge
 
 game::game()
 {
-    logger::error("testing");
 }
 
 game::~game()
@@ -95,16 +94,18 @@ void game::setup()
     m_registry.add_system<movement_system>();
     m_registry.add_system<render_system>();
 
+    m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
+    m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
+
     ecs::entity tank = m_registry.create_entity();
-    tank.add_component<ecs::transform_component>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.add_component<ecs::rigid_body_component>(glm::vec2(40.0, 0.0));
-    tank.add_component<ecs::sprite_component>(10, 10);
+    tank.add_component<ecs::sprite_component>("tank-image", 32, 32);
 
     ecs::entity truck = m_registry.create_entity();
     truck.add_component<ecs::transform_component>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 50.0));
-    truck.add_component<ecs::sprite_component>(10, 50);
-
+    truck.add_component<ecs::sprite_component>("truck-image", 32, 32);
 }
 
 void game::update()
@@ -128,7 +129,7 @@ void game::render()
     SDL_SetRenderDrawColor(m_renderer, 21, 21, 21, 255);
     SDL_RenderClear(m_renderer);
 
-    m_registry.get_system<render_system>().update(m_renderer);
+    m_registry.get_system<render_system>().update(m_renderer, m_asset_store);
 
     SDL_RenderPresent(m_renderer);
 }

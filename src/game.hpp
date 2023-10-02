@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "ecs/registry.hpp"
+#include "asset_store.hpp"
 
 namespace dge
 {
@@ -35,7 +36,7 @@ private:
     SDL_Renderer* m_renderer = nullptr;
     int millisecondsPreviousFrame = 0;
     ecs::registry m_registry;
-
+    asset_store m_asset_store;
 };
 
 }

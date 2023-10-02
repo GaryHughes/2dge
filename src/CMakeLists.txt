@@ -12,6 +12,7 @@ add_executable(game
     components/sprite_component.hpp
     systems/movement_system.hpp
     systems/render_system.hpp
+    asset_store.cpp asset_store.hpp
 )
 
 find_package(Lua 5.4 REQUIRED)

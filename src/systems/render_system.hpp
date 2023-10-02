@@ -6,6 +6,7 @@
 #include "../ecs/registry.hpp"
 #include "../components/transform_component.hpp"
 #include "../components/sprite_component.hpp"
+#include "../logger.hpp"
 
 namespace dge 
 {
@@ -20,21 +21,39 @@ public:
         require_component<ecs::sprite_component>();
     }
 
-    void update(SDL_Renderer* renderer)
+    void update(SDL_Renderer* renderer, const asset_store& assets)
     {
         for (auto& entity: entities()) {
              const auto& transform = entity.get_component<ecs::transform_component>();
              const auto& sprite = entity.get_component<ecs::sprite_component>();
 
-            SDL_Rect rect = {
+            SDL_Rect src_rect = sprite.src_rect; 
+
+            SDL_Rect dst_rect = {
                 int(transform.position.x),
                 int(transform.position.y),
-                sprite.width,
-                sprite.height
+                int(sprite.width * transform.scale.x),
+                int(sprite.height * transform.scale.y)
             };
 
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            SDL_RenderFillRect(renderer, &rect);
+            auto texture = assets.get_texture(sprite.asset_id);
+
+            if (texture == nullptr) {
+                logger::error("render_system failed to load asset with id = " + sprite.asset_id);
+                continue;
+            }
+
+            // logger::info("rendering sprite " + sprite.asset_id + 
+            //              " " + std::to_string(dst_rect.x) +
+            //              " " + std::to_string(dst_rect.y) +
+            //              " " + std::to_string(dst_rect.w) +
+            //              " " + std::to_string(dst_rect.y) +
+            //              " " + std::to_string(src_rect.x) +
+            //              " " + std::to_string(src_rect.y) +
+            //              " " + std::to_string(src_rect.w) + 
+            //              " " + std::to_string(src_rect.h));
+
+            SDL_RenderCopyEx(renderer, texture, &src_rect, &dst_rect, transform.rotation, nullptr, SDL_FLIP_NONE);
         }
     }
 
