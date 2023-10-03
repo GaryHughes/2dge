@@ -6,8 +6,10 @@
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include <iostream>
+#include <fstream>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace dge
 {
@@ -89,7 +91,7 @@ void game::process_input()
 
 }
 
-void game::setup()
+void game::load_level(int level)
 {
     m_registry.add_system<movement_system>();
     m_registry.add_system<render_system>();
@@ -97,15 +99,81 @@ void game::setup()
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
 
+    m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
+
+    auto jungle_texture = m_asset_store.get_texture("jungle-image");
+    SDL_Point size;
+    SDL_QueryTexture(jungle_texture, NULL, NULL, &size.x, &size.y);
+    
+    std::string jungle_map_file = "../../assets/tilemaps/jungle.map";
+    std::ifstream file(jungle_map_file);
+    if (!file) {
+        logger::error("unable to open file " + jungle_map_file);
+        return;
+    }
+    
+    int column = 0;
+    int row = 0;
+    const int tile_size = 32;
+    const double tile_scale = 1.0;
+    int tiles_per_row = size.x / tile_size;
+    int tiles_per_column = size.y / tile_size;
+    int total_tiles = tiles_per_row * tiles_per_column;
+
+    logger::info(jungle_map_file + " contains " + std::to_string(total_tiles) +  " tiles");
+
+    while (!file.eof()) {
+        std::string line;
+        if (!std::getline(file, line)) {
+            break;
+        }
+        logger::info("read map line " + line);
+        std::vector<std::string> tokens;
+        boost::split(tokens, line, boost::is_any_of(","));
+        logger::info("line contains " + std::to_string(tokens.size()) + " tokens");
+        for (const auto& token : tokens) {
+            if (token.size() != 2) {
+                logger::error("unexpected token " + token + " does not have 2 characters");
+                continue;
+            }
+            int x = std::atoi(token.substr(1, 1).c_str());
+            int y = std::atoi(token.substr(0, 1).c_str());
+
+            if (x >= tiles_per_row) {
+                logger::error("column " + std::to_string(x) + " > tiles per row " + std::to_string(tiles_per_row));
+                continue;
+            }
+
+            if (y >= tiles_per_column) {
+                logger::error("row " + std::to_string(y) + " > tiles per column " + std::to_string(tiles_per_column));
+                continue;
+            }
+        
+            ecs::entity tile = m_registry.create_entity();
+            tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
+            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, x * tile_size, y * tile_size);
+
+            column += 1;
+        }
+        column = 0;
+        row += 1;
+    }
+
+
     ecs::entity tank = m_registry.create_entity();
     tank.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.add_component<ecs::rigid_body_component>(glm::vec2(40.0, 0.0));
-    tank.add_component<ecs::sprite_component>("tank-image", 32, 32);
+    tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size);
 
     ecs::entity truck = m_registry.create_entity();
     truck.add_component<ecs::transform_component>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 50.0));
-    truck.add_component<ecs::sprite_component>("truck-image", 32, 32);
+    truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size);
+}
+
+void game::setup()
+{
+    load_level(1);
 }
 
 void game::update()

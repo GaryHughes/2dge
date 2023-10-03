@@ -31,6 +31,8 @@ public:
 
 private:
 
+    void load_level(int level);
+
     bool m_is_running = false;
     SDL_Window* m_window = nullptr;
     SDL_Renderer* m_renderer = nullptr;
