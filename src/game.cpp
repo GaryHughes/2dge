@@ -151,7 +151,7 @@ void game::load_level(int level)
         
             ecs::entity tile = m_registry.create_entity();
             tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
-            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, x * tile_size, y * tile_size);
+            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, 0, x * tile_size, y * tile_size);
 
             column += 1;
         }
@@ -163,12 +163,12 @@ void game::load_level(int level)
     ecs::entity tank = m_registry.create_entity();
     tank.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.add_component<ecs::rigid_body_component>(glm::vec2(40.0, 0.0));
-    tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size);
+    tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
 
     ecs::entity truck = m_registry.create_entity();
     truck.add_component<ecs::transform_component>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 50.0));
-    truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size);
+    truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
 }
 
 void game::setup()

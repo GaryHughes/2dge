@@ -23,7 +23,14 @@ public:
 
     void update(SDL_Renderer* renderer, const asset_store& assets)
     {
-        for (auto& entity: entities()) {
+        auto sorted_entities = entities();
+        std::sort(sorted_entities.begin(), sorted_entities.end(), [&](ecs::entity& left, ecs::entity& right) {
+            const auto& left_sprite = left.get_component<ecs::sprite_component>();
+            const auto& right_sprite = right.get_component<ecs::sprite_component>();
+            return left_sprite.z_index < right_sprite.z_index;
+        });
+
+        for (auto& entity: sorted_entities) {
              const auto& transform = entity.get_component<ecs::transform_component>();
              const auto& sprite = entity.get_component<ecs::sprite_component>();
 
