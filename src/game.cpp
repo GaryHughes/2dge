@@ -3,8 +3,10 @@
 #include "components/transform_component.hpp"
 #include "components/rigid_body_component.hpp"
 #include "components/sprite_component.hpp"
+#include "components/animation_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
+#include "systems/animation_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -95,9 +97,12 @@ void game::load_level(int level)
 {
     m_registry.add_system<movement_system>();
     m_registry.add_system<render_system>();
+    m_registry.add_system<animation_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
+    m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper.png");
+    m_asset_store.add_texture(m_renderer, "radar-image", "../../assets/images/radar.png");
 
     m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
 
@@ -159,6 +164,17 @@ void game::load_level(int level)
         row += 1;
     }
 
+    ecs::entity chopper = m_registry.create_entity();
+    chopper.add_component<ecs::transform_component>(glm::vec2(100.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 20.0));
+    chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
+    chopper.add_component<ecs::animation_component>(2, 15, true);
+
+    ecs::entity radar = m_registry.create_entity();
+    radar.add_component<ecs::transform_component>(glm::vec2(m_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
+    radar.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
+    radar.add_component<ecs::sprite_component>("radar-image", tile_size * 2, tile_size * 2, 2);
+    radar.add_component<ecs::animation_component>(8, 5, true);
 
     ecs::entity tank = m_registry.create_entity();
     tank.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -166,7 +182,7 @@ void game::load_level(int level)
     tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
 
     ecs::entity truck = m_registry.create_entity();
-    truck.add_component<ecs::transform_component>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.add_component<ecs::transform_component>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 50.0));
     truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
 }
@@ -188,7 +204,7 @@ void game::update()
     millisecondsPreviousFrame = SDL_GetTicks();
 
     m_registry.get_system<movement_system>().update(delta_time);
-
+    m_registry.get_system<animation_system>().update();
     m_registry.update();
 }
 

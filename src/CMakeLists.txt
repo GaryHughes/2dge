@@ -10,8 +10,10 @@ add_executable(game
     components/transform_component.hpp
     components/rigid_body_component.hpp
     components/sprite_component.hpp
+    components/animation_component.hpp
     systems/movement_system.hpp
     systems/render_system.hpp
+    systems/animation_system.hpp
     asset_store.cpp asset_store.hpp
 )
 
