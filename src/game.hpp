@@ -34,11 +34,13 @@ private:
     void load_level(int level);
 
     bool m_is_running = false;
+    bool m_is_debug = false;
     SDL_Window* m_window = nullptr;
     SDL_Renderer* m_renderer = nullptr;
     int millisecondsPreviousFrame = 0;
     ecs::registry m_registry;
     asset_store m_asset_store;
+
 };
 
 }

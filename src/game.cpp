@@ -4,9 +4,12 @@
 #include "components/rigid_body_component.hpp"
 #include "components/sprite_component.hpp"
 #include "components/animation_component.hpp"
+#include "components/box_collider_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
+#include "systems/collision_system.hpp"
+#include "systems/render_collider_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -87,6 +90,9 @@ void game::process_input()
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     m_is_running = false;
                 }
+                if (event.key.keysym.sym == SDLK_d) {
+                    m_is_debug = !m_is_debug;
+                }
                 break;
         };
     }
@@ -98,6 +104,8 @@ void game::load_level(int level)
     m_registry.add_system<movement_system>();
     m_registry.add_system<render_system>();
     m_registry.add_system<animation_system>();
+    m_registry.add_system<collision_system>();
+    m_registry.add_system<render_collider_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
@@ -165,8 +173,8 @@ void game::load_level(int level)
     }
 
     ecs::entity chopper = m_registry.create_entity();
-    chopper.add_component<ecs::transform_component>(glm::vec2(100.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 20.0));
+    chopper.add_component<ecs::transform_component>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
     chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
     chopper.add_component<ecs::animation_component>(2, 15, true);
 
@@ -177,14 +185,16 @@ void game::load_level(int level)
     radar.add_component<ecs::animation_component>(8, 5, true);
 
     ecs::entity tank = m_registry.create_entity();
-    tank.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.add_component<ecs::rigid_body_component>(glm::vec2(40.0, 0.0));
+    tank.add_component<ecs::transform_component>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.add_component<ecs::rigid_body_component>(glm::vec2(-30.0, 0.0));
     tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
+    tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
 
     ecs::entity truck = m_registry.create_entity();
-    truck.add_component<ecs::transform_component>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 50.0));
+    truck.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 0.0));
     truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
+    truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
 }
 
 void game::setup()
@@ -205,6 +215,7 @@ void game::update()
 
     m_registry.get_system<movement_system>().update(delta_time);
     m_registry.get_system<animation_system>().update();
+    m_registry.get_system<collision_system>().update();
     m_registry.update();
 }
 
@@ -214,6 +225,10 @@ void game::render()
     SDL_RenderClear(m_renderer);
 
     m_registry.get_system<render_system>().update(m_renderer, m_asset_store);
+
+    if (m_is_debug) {
+        m_registry.get_system<render_collider_system>().update(m_renderer);
+    }
 
     SDL_RenderPresent(m_renderer);
 }
