@@ -48,6 +48,8 @@ public:
 
                 if (collided) {
                     logger::info("entity " + std::to_string(i->id()) + " is colliding with entity " + std::to_string(j->id()));
+                    i->destroy();
+                    j->destroy();
                 }
             }    
         }

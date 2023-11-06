@@ -2,6 +2,7 @@
 #define dge_ecs_registry_hpp
 
 #include <vector>
+#include <deque>
 #include <unordered_map>
 #include <typeindex>
 #include <set>
@@ -20,6 +21,8 @@ class entity
 public:
 
     entity(int id) : m_id(id) {}
+
+    void destroy();
 
     int id() const { return m_id; }
 
@@ -187,6 +190,7 @@ public:
     void update();
 
     void add_entity_to_systems(entity e);
+    void remove_entity_from_systems(entity e);
 
 private:
 
@@ -196,6 +200,7 @@ private:
     // vector index == entity.id
     using signature_collection = std::vector<signature>;
     using system_collection = std::unordered_map<std::type_index, system_ptr>;
+    using id_collection = std::deque<int>;
 
     component_pool_collection m_component_pools;
     signature_collection m_entity_component_signatures;
@@ -205,6 +210,7 @@ private:
 
     std::set<entity> m_created_entities;
     std::set<entity> m_destroyed_entities;
+    id_collection m_free_ids;
 
 };
 
