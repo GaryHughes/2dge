@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include "ecs/registry.hpp"
 #include "asset_store.hpp"
+#include "event_bus/event_bus.hpp"
 
 namespace dge
 {
@@ -40,6 +41,7 @@ private:
     int millisecondsPreviousFrame = 0;
     ecs::registry m_registry;
     asset_store m_asset_store;
+    event_bus m_event_bus;
 
 };
 

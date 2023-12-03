@@ -10,6 +10,8 @@
 #include "systems/animation_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/render_collider_system.hpp"
+#include "systems/dameage_system.hpp"
+#include "systems/keyboard_control_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -93,6 +95,7 @@ void game::process_input()
                 if (event.key.keysym.sym == SDLK_d) {
                     m_is_debug = !m_is_debug;
                 }
+                m_event_bus.emit_event<key_pressed_event>(event.key.keysym.sym);
                 break;
         };
     }
@@ -106,6 +109,8 @@ void game::load_level(int level)
     m_registry.add_system<animation_system>();
     m_registry.add_system<collision_system>();
     m_registry.add_system<render_collider_system>();
+    m_registry.add_system<damage_system>();
+    m_registry.add_system<keyboard_control_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
@@ -213,10 +218,16 @@ void game::update()
 
     millisecondsPreviousFrame = SDL_GetTicks();
 
+    m_event_bus.reset();
+
+    m_registry.get_system<damage_system>().subscribe_to_events(m_event_bus);
+    m_registry.get_system<keyboard_control_system>().subscribe_to_events(m_event_bus);
+
+    m_registry.update();
+
     m_registry.get_system<movement_system>().update(delta_time);
     m_registry.get_system<animation_system>().update();
-    m_registry.get_system<collision_system>().update();
-    m_registry.update();
+    m_registry.get_system<collision_system>().update(m_event_bus);
 }
 
 void game::render()

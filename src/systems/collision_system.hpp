@@ -7,6 +7,8 @@
 #include "../components/box_collider_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../logger.hpp"
+#include "../event_bus/event_bus.hpp"
+#include "../events/collision_event.hpp"
 
 namespace dge 
 {
@@ -21,7 +23,7 @@ public:
         require_component<ecs::transform_component>();
     }
 
-    void update()
+    void update(event_bus& bus)
     {
         auto all_entities = entities();
 
@@ -48,8 +50,9 @@ public:
 
                 if (collided) {
                     logger::info("entity " + std::to_string(i->id()) + " is colliding with entity " + std::to_string(j->id()));
-                    i->destroy();
-                    j->destroy();
+                    //i->destroy();
+                    //j->destroy();
+                    bus.emit_event<collision_event>(*i, *j);
                 }
             }    
         }
