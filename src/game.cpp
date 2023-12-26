@@ -5,6 +5,7 @@
 #include "components/sprite_component.hpp"
 #include "components/animation_component.hpp"
 #include "components/box_collider_component.hpp"
+#include "components/keyboard_control_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
@@ -114,7 +115,7 @@ void game::load_level(int level)
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
-    m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper.png");
+    m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper-spritesheet.png");
     m_asset_store.add_texture(m_renderer, "radar-image", "../../assets/images/radar.png");
 
     m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
@@ -182,6 +183,14 @@ void game::load_level(int level)
     chopper.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
     chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
     chopper.add_component<ecs::animation_component>(2, 15, true);
+    chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20), glm::vec2(-20, 0));
+
+    ecs::entity chopper_b = m_registry.create_entity();
+    chopper_b.add_component<ecs::transform_component>(glm::vec2(70.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper_b.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
+    chopper_b.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
+    chopper_b.add_component<ecs::animation_component>(2, 15, true);
+    chopper_b.add_component<ecs::keyboard_control_component>(glm::vec2(0, -50), glm::vec2(50, 0), glm::vec2(0, 50), glm::vec2(-50, 0));
 
     ecs::entity radar = m_registry.create_entity();
     radar.add_component<ecs::transform_component>(glm::vec2(m_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
