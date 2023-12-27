@@ -21,17 +21,17 @@ public:
         require_component<ecs::transform_component>();
     }
 
-    void update(SDL_Renderer* renderer)
+    void update(SDL_Renderer* renderer, SDL_Rect& camera)
     {
         for (auto& entity: entities()) {
             auto& transform = entity.get_component<ecs::transform_component>();
             auto& collider = entity.get_component<ecs::box_collider_component>();
 
             SDL_Rect collider_rect = {
-                int(transform.position.x + collider.offset.x),
-                int(transform.position.y + collider.offset.y),
-                int(collider.width),
-                int(collider.height)
+                int(transform.position.x + collider.offset.x - camera.x),
+                int(transform.position.y + collider.offset.y - camera.y),
+                int(collider.width * transform.scale.x),
+                int(collider.height * transform.scale.y)
             };
 
             SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);

@@ -258,7 +258,7 @@ void game::render()
     m_registry.get_system<render_system>().update(m_renderer, m_asset_store, m_camera);
 
     if (m_is_debug) {
-        m_registry.get_system<render_collider_system>().update(m_renderer);
+        m_registry.get_system<render_collider_system>().update(m_renderer, m_camera);
     }
 
     SDL_RenderPresent(m_renderer);
