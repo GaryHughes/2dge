@@ -28,9 +28,9 @@ public:
 
     void on_collision(collision_event& event)
     {
-        logger::info("The damage system received an event between entities " + std::to_string(event.a.id()) + " and " + std::to_string(event.b.id()));
-        event.a.destroy();
-        event.b.destroy();
+        // logger::info("The damage system received an event between entities " + std::to_string(event.a.id()) + " and " + std::to_string(event.b.id()));
+        // event.a.destroy();
+        // event.b.destroy();
     }
 
     void update()

@@ -7,6 +7,8 @@
 #include "components/box_collider_component.hpp"
 #include "components/keyboard_control_component.hpp"
 #include "components/camera_follow_component.hpp"
+#include "components/projectile_emitter_component.hpp"
+#include "components/health_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
@@ -15,6 +17,8 @@
 #include "systems/dameage_system.hpp"
 #include "systems/keyboard_control_system.hpp"
 #include "systems/camera_movement_system.hpp"
+#include "systems/projectile_emitter_system.hpp"
+#include "systems/projectile_lifecycle_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -125,11 +129,14 @@ void game::load_level(int level)
     m_registry.add_system<damage_system>();
     m_registry.add_system<keyboard_control_system>();
     m_registry.add_system<camera_movement_system>();
+    m_registry.add_system<projectile_emitter_system>();
+    m_registry.add_system<projectile_lifecycle_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
     m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper-spritesheet.png");
     m_asset_store.add_texture(m_renderer, "radar-image", "../../assets/images/radar.png");
+    m_asset_store.add_texture(m_renderer, "bullet-image", "../../assets/images/bullet.png");
 
     m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
 
@@ -201,6 +208,8 @@ void game::load_level(int level)
     chopper.add_component<ecs::animation_component>(2, 15, true);
     chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
     chopper.add_component<ecs::camera_follow_component>();
+    chopper.add_component<ecs::health_component>(100);
+    chopper.add_component<ecs::projectile_emitter_component>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
 
     ecs::entity radar = m_registry.create_entity();
     radar.add_component<ecs::transform_component>(glm::vec2(s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
@@ -210,15 +219,19 @@ void game::load_level(int level)
 
     ecs::entity tank = m_registry.create_entity();
     tank.add_component<ecs::transform_component>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.add_component<ecs::rigid_body_component>(glm::vec2(-30.0, 0.0));
+    tank.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
     tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
+    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 2000, 0, false);
+    tank.add_component<ecs::health_component>(100);
 
     ecs::entity truck = m_registry.create_entity();
     truck.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 0.0));
+    truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
     truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
+    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 3000, 0, false);
+    truck.add_component<ecs::health_component>(100);
 }
 
 void game::setup()
@@ -241,13 +254,16 @@ void game::update()
 
     m_registry.get_system<damage_system>().subscribe_to_events(m_event_bus);
     m_registry.get_system<keyboard_control_system>().subscribe_to_events(m_event_bus);
+    m_registry.get_system<projectile_emitter_system>().subscribe_to_events(m_event_bus);
 
     m_registry.update();
 
     m_registry.get_system<movement_system>().update(delta_time);
     m_registry.get_system<animation_system>().update();
     m_registry.get_system<collision_system>().update(m_event_bus);
+    m_registry.get_system<projectile_emitter_system>().update(m_registry);
     m_registry.get_system<camera_movement_system>().update(m_camera);
+    m_registry.get_system<projectile_lifecycle_system>().update();
 }
 
 void game::render()
