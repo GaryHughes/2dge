@@ -6,6 +6,7 @@
 #include "components/animation_component.hpp"
 #include "components/box_collider_component.hpp"
 #include "components/keyboard_control_component.hpp"
+#include "components/camera_follow_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
@@ -13,6 +14,7 @@
 #include "systems/render_collider_system.hpp"
 #include "systems/dameage_system.hpp"
 #include "systems/keyboard_control_system.hpp"
+#include "systems/camera_movement_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -21,6 +23,11 @@
 
 namespace dge
 {
+
+int game::s_window_width = 800;
+int game::s_window_height = 600;
+int game::s_map_width = 0;
+int game::s_map_height = 0;
 
 game::game()
 {
@@ -48,8 +55,8 @@ void game::initialise()
     m_window = SDL_CreateWindow(nullptr, 
                                 SDL_WINDOWPOS_CENTERED, 
                                 SDL_WINDOWPOS_CENTERED, 
-                                m_window_width,
-                                m_window_height,
+                                s_window_width,
+                                s_window_height,
                                 SDL_WINDOW_BORDERLESS);
 
     if (m_window == nullptr) {
@@ -65,6 +72,11 @@ void game::initialise()
     }
 
     SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+
+    m_camera.x = 0;
+    m_camera.y = 0;
+    m_camera.w = s_window_width;
+    m_camera.h = s_window_height;
 
     m_is_running = true;
 }
@@ -112,6 +124,7 @@ void game::load_level(int level)
     m_registry.add_system<render_collider_system>();
     m_registry.add_system<damage_system>();
     m_registry.add_system<keyboard_control_system>();
+    m_registry.add_system<camera_movement_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
@@ -178,22 +191,19 @@ void game::load_level(int level)
         row += 1;
     }
 
+    s_map_width = tiles_per_column * tile_size * tile_scale;
+    s_map_height = tiles_per_row * tile_size * tile_scale;
+    
     ecs::entity chopper = m_registry.create_entity();
     chopper.add_component<ecs::transform_component>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
     chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
     chopper.add_component<ecs::animation_component>(2, 15, true);
-    chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20), glm::vec2(-20, 0));
-
-    ecs::entity chopper_b = m_registry.create_entity();
-    chopper_b.add_component<ecs::transform_component>(glm::vec2(70.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper_b.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
-    chopper_b.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
-    chopper_b.add_component<ecs::animation_component>(2, 15, true);
-    chopper_b.add_component<ecs::keyboard_control_component>(glm::vec2(0, -50), glm::vec2(50, 0), glm::vec2(0, 50), glm::vec2(-50, 0));
+    chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
+    chopper.add_component<ecs::camera_follow_component>();
 
     ecs::entity radar = m_registry.create_entity();
-    radar.add_component<ecs::transform_component>(glm::vec2(m_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
+    radar.add_component<ecs::transform_component>(glm::vec2(s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
     radar.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     radar.add_component<ecs::sprite_component>("radar-image", tile_size * 2, tile_size * 2, 2);
     radar.add_component<ecs::animation_component>(8, 5, true);
@@ -237,6 +247,7 @@ void game::update()
     m_registry.get_system<movement_system>().update(delta_time);
     m_registry.get_system<animation_system>().update();
     m_registry.get_system<collision_system>().update(m_event_bus);
+    m_registry.get_system<camera_movement_system>().update(m_camera);
 }
 
 void game::render()
@@ -244,7 +255,7 @@ void game::render()
     SDL_SetRenderDrawColor(m_renderer, 21, 21, 21, 255);
     SDL_RenderClear(m_renderer);
 
-    m_registry.get_system<render_system>().update(m_renderer, m_asset_store);
+    m_registry.get_system<render_system>().update(m_renderer, m_asset_store, m_camera);
 
     if (m_is_debug) {
         m_registry.get_system<render_collider_system>().update(m_renderer);

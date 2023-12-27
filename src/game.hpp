@@ -27,8 +27,10 @@ public:
     void render();
     void destroy();
 
-    int m_window_width = 800;
-    int m_window_height = 600;
+    static int s_window_width;
+    static int s_window_height;
+    static int s_map_width;
+    static int s_map_height;
 
 private:
 
@@ -42,6 +44,7 @@ private:
     ecs::registry m_registry;
     asset_store m_asset_store;
     event_bus m_event_bus;
+    SDL_Rect m_camera;
 
 };
 

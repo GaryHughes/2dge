@@ -21,7 +21,7 @@ public:
         require_component<ecs::sprite_component>();
     }
 
-    void update(SDL_Renderer* renderer, const asset_store& assets)
+    void update(SDL_Renderer* renderer, const asset_store& assets, SDL_Rect& camera)
     {
         auto sorted_entities = entities();
         std::sort(sorted_entities.begin(), sorted_entities.end(), [&](ecs::entity& left, ecs::entity& right) {
@@ -37,8 +37,8 @@ public:
             SDL_Rect src_rect = sprite.src_rect; 
 
             SDL_Rect dst_rect = {
-                int(transform.position.x),
-                int(transform.position.y),
+                int(transform.position.x - camera.x),
+                int(transform.position.y - camera.y),
                 int(sprite.width * transform.scale.x),
                 int(sprite.height * transform.scale.y)
             };
