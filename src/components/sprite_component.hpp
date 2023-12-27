@@ -13,13 +13,15 @@ struct sprite_component
     int width;
     int height;
     int z_index;
+    bool is_fixed;
     SDL_Rect src_rect;
    
-    sprite_component(const std::string& id = "", int w = 0, int h = 0, int z = 0, int src_x = 0, int src_y = 0)
+    sprite_component(const std::string& id = "", int w = 0, int h = 0, int z = 0, bool f = false, int src_x = 0, int src_y = 0)
     :   asset_id(id),
         width(w),
         height(h),
         z_index(z),
+        is_fixed(f),
         src_rect(SDL_Rect { src_x, src_y, w, h })
     {
     }

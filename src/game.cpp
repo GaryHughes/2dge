@@ -183,7 +183,7 @@ void game::load_level(int level)
         
             ecs::entity tile = m_registry.create_entity();
             tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
-            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, 0, x * tile_size, y * tile_size);
+            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, 0, false, x * tile_size, y * tile_size);
 
             column += 1;
         }
@@ -205,7 +205,7 @@ void game::load_level(int level)
     ecs::entity radar = m_registry.create_entity();
     radar.add_component<ecs::transform_component>(glm::vec2(s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
     radar.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    radar.add_component<ecs::sprite_component>("radar-image", tile_size * 2, tile_size * 2, 2);
+    radar.add_component<ecs::sprite_component>("radar-image", tile_size * 2, tile_size * 2, 2, true);
     radar.add_component<ecs::animation_component>(8, 5, true);
 
     ecs::entity tank = m_registry.create_entity();

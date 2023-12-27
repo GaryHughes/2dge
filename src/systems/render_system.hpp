@@ -37,8 +37,8 @@ public:
             SDL_Rect src_rect = sprite.src_rect; 
 
             SDL_Rect dst_rect = {
-                int(transform.position.x - camera.x),
-                int(transform.position.y - camera.y),
+                int(transform.position.x - (sprite.is_fixed ? 0 : camera.x)),
+                int(transform.position.y - (sprite.is_fixed ? 0 : camera.y)),
                 int(sprite.width * transform.scale.x),
                 int(sprite.height * transform.scale.y)
             };
