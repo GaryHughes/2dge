@@ -79,6 +79,7 @@ public:
 
 
             ecs::entity projectile = entity.registry->create_entity();
+            projectile.group("projectiles");
             projectile.add_component<ecs::transform_component>(projectile_position, glm::vec2(1.0, 1.0), 0.0);
             projectile.add_component<ecs::rigid_body_component>(projectile_velocity);
             projectile.add_component<ecs::sprite_component>("bullet-image", 4, 4, 4);
@@ -106,6 +107,7 @@ public:
                     projectile_position.y += transform.scale.y * sprite.height / 2; 
                 }
                 ecs::entity projectile = registry.create_entity();
+                projectile.group("projectiles");
                 projectile.add_component<ecs::transform_component>(projectile_position, glm::vec2(1.0, 1.0), 0.0);
                 projectile.add_component<ecs::rigid_body_component>(emitter.projectile_velocity);
                 projectile.add_component<ecs::sprite_component>("bullet-image", 4, 4, 4);

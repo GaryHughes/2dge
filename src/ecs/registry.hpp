@@ -43,6 +43,11 @@ public:
     template<typename ComponentType> 
     ComponentType& get_component();
 
+    void tag(const std::string& tag);
+    bool has_tag(const std::string& tag);
+    void group(const std::string& group);
+    bool has_group(const std::string& group);
+
 private:
 
     int m_id;
@@ -192,6 +197,16 @@ public:
     void add_entity_to_systems(entity e);
     void remove_entity_from_systems(entity e);
 
+    void tag_entity(const ecs::entity& entity, const std::string& tag);
+    bool entity_has_tag(const ecs::entity& entity, const std::string& tag) const;
+    ecs::entity get_entity_by_tag(const std::string& tag) const;
+    void remove_entity_by_tag(const ecs::entity& entity);
+
+    void group_entity(const ecs::entity entity, const std::string& group);
+    bool entity_belongs_to_group(const ecs::entity& entity, const std::string& group) const;
+    std::vector<ecs::entity> get_entities_by_group(const std::string& group) const;
+    void remove_entity_group(const ecs::entity entity);
+
 private:
 
     // vector index == component.id
@@ -211,6 +226,12 @@ private:
     std::set<entity> m_created_entities;
     std::set<entity> m_destroyed_entities;
     id_collection m_free_ids;
+
+    std::unordered_map<std::string, ecs::entity> m_entity_per_tag;
+    std::unordered_map<int, std::string> m_tag_per_entity;
+
+    std::unordered_map<std::string, std::set<ecs::entity>> m_entities_per_group;
+    std::unordered_map<int, std::string> m_group_per_entity;
 
 };
 

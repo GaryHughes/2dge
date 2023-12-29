@@ -14,7 +14,7 @@
 #include "systems/animation_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/render_collider_system.hpp"
-#include "systems/dameage_system.hpp"
+#include "systems/damage_system.hpp"
 #include "systems/keyboard_control_system.hpp"
 #include "systems/camera_movement_system.hpp"
 #include "systems/projectile_emitter_system.hpp"
@@ -189,6 +189,7 @@ void game::load_level(int level)
             }
         
             ecs::entity tile = m_registry.create_entity();
+            tile.group("tiles");
             tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
             tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, 0, false, x * tile_size, y * tile_size);
 
@@ -202,6 +203,7 @@ void game::load_level(int level)
     s_map_height = tiles_per_row * tile_size * tile_scale;
     
     ecs::entity chopper = m_registry.create_entity();
+    chopper.tag("player");
     chopper.add_component<ecs::transform_component>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
     chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
@@ -209,7 +211,8 @@ void game::load_level(int level)
     chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
     chopper.add_component<ecs::camera_follow_component>();
     chopper.add_component<ecs::health_component>(100);
-    chopper.add_component<ecs::projectile_emitter_component>(glm::vec2(150.0, 150.0), 0, 10000, 0, true);
+    chopper.add_component<ecs::projectile_emitter_component>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
+    chopper.add_component<ecs::box_collider_component>(32, 32);
 
     ecs::entity radar = m_registry.create_entity();
     radar.add_component<ecs::transform_component>(glm::vec2(s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
@@ -218,19 +221,21 @@ void game::load_level(int level)
     radar.add_component<ecs::animation_component>(8, 5, true);
 
     ecs::entity tank = m_registry.create_entity();
+    tank.group("enemies");
     tank.add_component<ecs::transform_component>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
     tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 2000, 0, false);
+    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 2000, 10, false);
     tank.add_component<ecs::health_component>(100);
 
     ecs::entity truck = m_registry.create_entity();
+    truck.group("enemies");
     truck.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
     truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 3000, 0, false);
+    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 3000, 10, false);
     truck.add_component<ecs::health_component>(100);
 }
 

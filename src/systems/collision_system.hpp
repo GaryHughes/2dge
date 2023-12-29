@@ -49,9 +49,7 @@ public:
                 );
 
                 if (collided) {
-                    logger::info("entity " + std::to_string(i->id()) + " is colliding with entity " + std::to_string(j->id()));
-                    //i->destroy();
-                    //j->destroy();
+                    logger::info("entity " + std::to_string(i->id()) + " collided with entity " + std::to_string(j->id()));
                     bus.emit_event<collision_event>(*i, *j);
                 }
             }    
