@@ -9,6 +9,7 @@
 #include "components/camera_follow_component.hpp"
 #include "components/projectile_emitter_component.hpp"
 #include "components/health_component.hpp"
+#include "components/text_label_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
@@ -19,6 +20,8 @@
 #include "systems/camera_movement_system.hpp"
 #include "systems/projectile_emitter_system.hpp"
 #include "systems/projectile_lifecycle_system.hpp"
+#include "systems/render_text_system.hpp"
+#include "systems/render_health_bar_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
@@ -47,6 +50,11 @@ void game::initialise()
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         logger::error("Error initialising SDL");
+        return;
+    }
+
+    if (TTF_Init() != 0) {
+        logger::error("TTF initialisation failed");
         return;
     }
 
@@ -131,6 +139,8 @@ void game::load_level(int level)
     m_registry.add_system<camera_movement_system>();
     m_registry.add_system<projectile_emitter_system>();
     m_registry.add_system<projectile_lifecycle_system>();
+    m_registry.add_system<render_text_system>();
+    m_registry.add_system<render_health_bar_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
@@ -140,6 +150,9 @@ void game::load_level(int level)
 
     m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
 
+    m_asset_store.add_font("charriot-font", "../../assets/fonts/charriot.ttf", 20);
+    m_asset_store.add_font("charriot-font-5", "../../assets/fonts/charriot.ttf", 5);
+  
     auto jungle_texture = m_asset_store.get_texture("jungle-image");
     SDL_Point size;
     SDL_QueryTexture(jungle_texture, NULL, NULL, &size.x, &size.y);
@@ -237,6 +250,10 @@ void game::load_level(int level)
     truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
     truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 3000, 10, false);
     truck.add_component<ecs::health_component>(100);
+
+    ecs::entity label = m_registry.create_entity();
+    SDL_Color green = {0, 255, 0};
+    label.add_component<ecs::text_label_component>(glm::vec2(s_window_width / 2 - 40, 10), "CHOPPER 1.0", "charriot-font", green);
 }
 
 void game::setup()
@@ -277,6 +294,8 @@ void game::render()
     SDL_RenderClear(m_renderer);
 
     m_registry.get_system<render_system>().update(m_renderer, m_asset_store, m_camera);
+    m_registry.get_system<render_text_system>().update(m_renderer, m_asset_store, m_camera);
+    m_registry.get_system<render_health_bar_system>().update(m_renderer, m_asset_store, m_camera);
 
     if (m_is_debug) {
         m_registry.get_system<render_collider_system>().update(m_renderer, m_camera);

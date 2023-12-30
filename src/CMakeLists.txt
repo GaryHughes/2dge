@@ -23,9 +23,11 @@ target_include_directories(game PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 target_link_libraries(game 
     SDL2::Main 
     SDL2::Image
+    SDL2::TTF
     ${LUA_LIBRARIES}
 )
