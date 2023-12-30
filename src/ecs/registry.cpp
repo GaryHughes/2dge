@@ -69,6 +69,13 @@ void registry::update()
     for (const auto& entity : m_destroyed_entities) {
         remove_entity_from_systems(entity);
         m_entity_component_signatures[entity.id()].reset();
+
+        for (auto pool : m_component_pools) {
+            if (pool) {
+                pool->remove_entity_from_pool(entity.id());
+            }
+        }
+
         m_free_ids.push_back(entity.id());
         remove_entity_by_tag(entity);
         remove_entity_group(entity);

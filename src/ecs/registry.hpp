@@ -124,10 +124,6 @@ public:
 
         std::shared_ptr<pool<ComponentType>> p = std::static_pointer_cast<pool<ComponentType>>(m_component_pools[component_id]);
     
-        if (entity_id >= p->size()) {
-            p->resize(m_entity_count);
-        }
-
         ComponentType c(std::forward<TArgs>(args)...);
 
         p->set(entity_id, c);
@@ -142,8 +138,12 @@ public:
     {
         const auto component_id = component<ComponentType>::id();
         const auto entity_id = e.id();
-        // TODO - range check
+   
+        std::shared_ptr<pool<ComponentType>> p = std::static_pointer_cast<pool<ComponentType>>(m_component_pools[component_id]);
+        p.remove(entity_id);
+   
         m_entity_component_signatures[entity_id].set(component_id, false);
+   
         logger::info("component id = " + std::to_string(component_id) + " was removed from entity id = " + std::to_string(entity_id));
     }
 
