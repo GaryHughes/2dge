@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.10.0)
 
 project(2dge)
 
-set(CMAKE_CXX_CLANG_TIDY
-    clang-tidy;
-    -warnings-as-errors=*;
-    )
+# ImGUI can't handle this.
+# set(CMAKE_CXX_CLANG_TIDY
+#     clang-tidy;
+#     -warnings-as-errors=*;
+#     )
 
 # Don't embed build tree paths
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)

@@ -22,11 +22,15 @@
 #include "systems/projectile_lifecycle_system.hpp"
 #include "systems/render_text_system.hpp"
 #include "systems/render_health_bar_system.hpp"
+#include "systems/render_gui_system.hpp"
 #include <iostream>
 #include <fstream>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <boost/algorithm/string.hpp>
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_sdl2.h>
+#include <imgui/backends/imgui_impl_sdlrenderer2.h>
 
 namespace dge
 {
@@ -58,12 +62,6 @@ void game::initialise()
         return;
     }
 
-    // SDL_DisplayMode display_mode;
-    // SDL_GetCurrentDisplayMode(0, &display_mode);
-
-    // m_window_width = display_mode.w;
-    // m_window_height = display_mode.h;
-
     m_window = SDL_CreateWindow(nullptr, 
                                 SDL_WINDOWPOS_CENTERED, 
                                 SDL_WINDOWPOS_CENTERED, 
@@ -84,6 +82,12 @@ void game::initialise()
     }
 
     SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui_ImplSDL2_InitForSDLRenderer(m_window, m_renderer);
+    ImGui_ImplSDLRenderer2_Init(m_renderer);
 
     m_camera.x = 0;
     m_camera.y = 0;
@@ -108,6 +112,7 @@ void game::process_input()
     SDL_Event event;
     
     while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL2_ProcessEvent(&event);
         switch (event.type) {
             case SDL_QUIT:
                 m_is_running = false;
@@ -141,6 +146,7 @@ void game::load_level(int level)
     m_registry.add_system<projectile_lifecycle_system>();
     m_registry.add_system<render_text_system>();
     m_registry.add_system<render_health_bar_system>();
+    m_registry.add_system<render_gui_system>();
 
     m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
     m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
@@ -299,6 +305,7 @@ void game::render()
 
     if (m_is_debug) {
         m_registry.get_system<render_collider_system>().update(m_renderer, m_camera);
+        m_registry.get_system<render_gui_system>().update(m_registry);
     }
 
     SDL_RenderPresent(m_renderer);
@@ -306,6 +313,10 @@ void game::render()
 
 void game::destroy()
 {  
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
     if (m_renderer != nullptr) {
         SDL_DestroyRenderer(m_renderer);
     }
