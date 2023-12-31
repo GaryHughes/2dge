@@ -24,6 +24,9 @@ public:
     void update(SDL_Renderer* renderer, const asset_store& assets, SDL_Rect& camera)
     {
         auto sorted_entities = entities();
+
+        // TODO - cull here instead of in the loop below
+
         std::sort(sorted_entities.begin(), sorted_entities.end(), [&](ecs::entity& left, ecs::entity& right) {
             const auto& left_sprite = left.get_component<ecs::sprite_component>();
             const auto& right_sprite = right.get_component<ecs::sprite_component>();
@@ -31,8 +34,20 @@ public:
         });
 
         for (auto& entity: sorted_entities) {
-             const auto& transform = entity.get_component<ecs::transform_component>();
-             const auto& sprite = entity.get_component<ecs::sprite_component>();
+            const auto& transform = entity.get_component<ecs::transform_component>();
+            const auto& sprite = entity.get_component<ecs::sprite_component>();
+
+            if (!sprite.is_fixed) {
+                bool is_entity_outside_camera_view = 
+                    transform.position.x + (transform.scale.x * sprite.width) < camera.x ||
+                    transform.position.x > camera.x + camera.w ||
+                    transform.position.y + (transform.scale.y * sprite.height) < camera.y ||
+                    transform.position.y > camera.y + camera.h;
+
+                if (is_entity_outside_camera_view) {
+                    continue;
+                }
+            }
 
             SDL_Rect src_rect = sprite.src_rect; 
 
@@ -60,7 +75,7 @@ public:
             //              " " + std::to_string(src_rect.w) + 
             //              " " + std::to_string(src_rect.h));
 
-            SDL_RenderCopyEx(renderer, texture, &src_rect, &dst_rect, transform.rotation, nullptr, SDL_FLIP_NONE);
+            SDL_RenderCopyEx(renderer, texture, &src_rect, &dst_rect, transform.rotation, nullptr, sprite.flip);
         }
     }
 

@@ -153,6 +153,7 @@ void game::load_level(int level)
     m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper-spritesheet.png");
     m_asset_store.add_texture(m_renderer, "radar-image", "../../assets/images/radar.png");
     m_asset_store.add_texture(m_renderer, "bullet-image", "../../assets/images/bullet.png");
+    m_asset_store.add_texture(m_renderer, "tree-image", "../../assets/images/tree.png");
 
     m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
 
@@ -179,6 +180,9 @@ void game::load_level(int level)
     int total_tiles = tiles_per_row * tiles_per_column;
 
     logger::info(jungle_map_file + " contains " + std::to_string(total_tiles) +  " tiles");
+
+    int max_row = 0;
+    int max_column = 0;
 
     while (!file.eof()) {
         std::string line;
@@ -214,12 +218,21 @@ void game::load_level(int level)
 
             column += 1;
         }
+
+        if (column > max_column) {
+            max_column = column;
+        }
+
         column = 0;
         row += 1;
+
+        if (row > max_row) {
+            max_row = row;
+        }
     }
 
-    s_map_width = tiles_per_column * tile_size * tile_scale;
-    s_map_height = tiles_per_row * tile_size * tile_scale;
+    s_map_width = max_column * tile_size * tile_scale;
+    s_map_height = max_row * tile_size * tile_scale;
     
     ecs::entity chopper = m_registry.create_entity();
     chopper.tag("player");
@@ -241,11 +254,11 @@ void game::load_level(int level)
 
     ecs::entity tank = m_registry.create_entity();
     tank.group("enemies");
-    tank.add_component<ecs::transform_component>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
+    tank.add_component<ecs::transform_component>(glm::vec2(500.0, 400.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 0.0));
     tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
     tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 2000, 10, false);
+    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 10000, 10, false);
     tank.add_component<ecs::health_component>(100);
 
     ecs::entity truck = m_registry.create_entity();
@@ -254,8 +267,22 @@ void game::load_level(int level)
     truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
     truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
     truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 3000, 10, false);
+    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 10000, 10, false);
     truck.add_component<ecs::health_component>(100);
+
+    ecs::entity tree_a = m_registry.create_entity();
+    tree_a.group("obstacles");
+    tree_a.add_component<ecs::transform_component>(glm::vec2(600.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
+    tree_a.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
+    tree_a.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
+    tree_a.add_component<ecs::box_collider_component>(16, 32);
+
+    ecs::entity tree_b = m_registry.create_entity();
+    tree_b.group("obstacles");
+    tree_b.add_component<ecs::transform_component>(glm::vec2(400.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
+    tree_b.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
+    tree_b.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
+    tree_b.add_component<ecs::box_collider_component>(16, 32);
 
     ecs::entity label = m_registry.create_entity();
     SDL_Color green = {0, 255, 0};
@@ -283,6 +310,7 @@ void game::update()
     m_registry.get_system<damage_system>().subscribe_to_events(m_event_bus);
     m_registry.get_system<keyboard_control_system>().subscribe_to_events(m_event_bus);
     m_registry.get_system<projectile_emitter_system>().subscribe_to_events(m_event_bus);
+    m_registry.get_system<movement_system>().subscribe_to_events(m_event_bus);
 
     m_registry.update();
 
