@@ -14,8 +14,8 @@ add_executable(game
     systems/movement_system.hpp
     systems/render_system.hpp
     systems/animation_system.hpp
-    asset_store.cpp 
-    asset_store.hpp
+    asset_store.cpp asset_store.hpp
+    level_loader.cpp level_loader.hpp
     ../thirdparty/imgui/imconfig.h
     ../thirdparty/imgui/imgui.h
     ../thirdparty/imgui/imgui_draw.cpp

@@ -2,6 +2,7 @@
 #define dge_game_hpp
 
 #include <SDL2/SDL.h>
+#include <sol/sol.hpp>
 #include "ecs/registry.hpp"
 #include "asset_store.hpp"
 #include "event_bus/event_bus.hpp"
@@ -34,8 +35,6 @@ public:
 
 private:
 
-    void load_level(int level);
-
     bool m_is_running = false;
     bool m_is_debug = false;
     SDL_Window* m_window = nullptr;
@@ -45,6 +44,7 @@ private:
     asset_store m_asset_store;
     event_bus m_event_bus;
     SDL_Rect m_camera;
+    sol::state m_lua;
 
 };
 

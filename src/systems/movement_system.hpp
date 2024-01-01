@@ -5,6 +5,7 @@
 #include "../ecs/registry.hpp"
 #include "../components/transform_component.hpp"
 #include "../components/rigid_body_component.hpp"
+#include "../components/sprite_component.hpp"
 #include "../logger.hpp"
 #include "../event_bus/event_bus.hpp"
 #include "../events/collision_event.hpp"

@@ -36,11 +36,15 @@ public:
             return;
         }
 
+        logger::info("space pressed");
+
         for (auto entity : entities()) {
             
             if (!entity.has_component<ecs::camera_follow_component>()) {
                 continue;
             }
+
+            logger::info("found entity with camera follow");
 
             const auto transform = entity.get_component<ecs::transform_component>();
             const auto emitter = entity.get_component<ecs::projectile_emitter_component>();
@@ -82,7 +86,7 @@ public:
             projectile.group("projectiles");
             projectile.add_component<ecs::transform_component>(projectile_position, glm::vec2(1.0, 1.0), 0.0);
             projectile.add_component<ecs::rigid_body_component>(projectile_velocity);
-            projectile.add_component<ecs::sprite_component>("bullet-image", 4, 4, 4);
+            projectile.add_component<ecs::sprite_component>("bullet-texture", 4, 4, 4);
             projectile.add_component<ecs::box_collider_component>(4, 4);
             projectile.add_component<ecs::projectile_component>(emitter.is_friendly, emitter.hit_percentage, emitter.projectile_duration);
         }
@@ -110,7 +114,7 @@ public:
                 projectile.group("projectiles");
                 projectile.add_component<ecs::transform_component>(projectile_position, glm::vec2(1.0, 1.0), 0.0);
                 projectile.add_component<ecs::rigid_body_component>(emitter.projectile_velocity);
-                projectile.add_component<ecs::sprite_component>("bullet-image", 4, 4, 4);
+                projectile.add_component<ecs::sprite_component>("bullet-texture", 4, 4, 4);
                 projectile.add_component<ecs::box_collider_component>(4, 4);
                 projectile.add_component<ecs::projectile_component>(emitter.is_friendly, emitter.hit_percentage, emitter.projectile_duration);
                 emitter.last_emission_time = SDL_GetTicks();

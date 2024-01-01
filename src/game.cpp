@@ -1,15 +1,5 @@
 #include "game.hpp"
 #include "logger.hpp"
-#include "components/transform_component.hpp"
-#include "components/rigid_body_component.hpp"
-#include "components/sprite_component.hpp"
-#include "components/animation_component.hpp"
-#include "components/box_collider_component.hpp"
-#include "components/keyboard_control_component.hpp"
-#include "components/camera_follow_component.hpp"
-#include "components/projectile_emitter_component.hpp"
-#include "components/health_component.hpp"
-#include "components/text_label_component.hpp"
 #include "systems/movement_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/animation_system.hpp"
@@ -23,11 +13,10 @@
 #include "systems/render_text_system.hpp"
 #include "systems/render_health_bar_system.hpp"
 #include "systems/render_gui_system.hpp"
+#include "level_loader.hpp"
 #include <iostream>
-#include <fstream>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
-#include <boost/algorithm/string.hpp>
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_sdl2.h>
 #include <imgui/backends/imgui_impl_sdlrenderer2.h>
@@ -132,7 +121,7 @@ void game::process_input()
 
 }
 
-void game::load_level(int level)
+void game::setup()
 {
     m_registry.add_system<movement_system>();
     m_registry.add_system<render_system>();
@@ -148,150 +137,9 @@ void game::load_level(int level)
     m_registry.add_system<render_health_bar_system>();
     m_registry.add_system<render_gui_system>();
 
-    m_asset_store.add_texture(m_renderer, "tank-image", "../../assets/images/tank-panther-right.png");
-    m_asset_store.add_texture(m_renderer, "truck-image", "../../assets/images/truck-ford-right.png");
-    m_asset_store.add_texture(m_renderer, "chopper-image", "../../assets/images/chopper-spritesheet.png");
-    m_asset_store.add_texture(m_renderer, "radar-image", "../../assets/images/radar.png");
-    m_asset_store.add_texture(m_renderer, "bullet-image", "../../assets/images/bullet.png");
-    m_asset_store.add_texture(m_renderer, "tree-image", "../../assets/images/tree.png");
-
-    m_asset_store.add_texture(m_renderer, "jungle-image", "../../assets/tilemaps/jungle.png");
-
-    m_asset_store.add_font("charriot-font", "../../assets/fonts/charriot.ttf", 20);
-    m_asset_store.add_font("charriot-font-5", "../../assets/fonts/charriot.ttf", 5);
-  
-    auto jungle_texture = m_asset_store.get_texture("jungle-image");
-    SDL_Point size;
-    SDL_QueryTexture(jungle_texture, NULL, NULL, &size.x, &size.y);
-    
-    std::string jungle_map_file = "../../assets/tilemaps/jungle.map";
-    std::ifstream file(jungle_map_file);
-    if (!file) {
-        logger::error("unable to open file " + jungle_map_file);
-        return;
-    }
-    
-    int column = 0;
-    int row = 0;
-    const int tile_size = 32;
-    const double tile_scale = 1.0;
-    int tiles_per_row = size.x / tile_size;
-    int tiles_per_column = size.y / tile_size;
-    int total_tiles = tiles_per_row * tiles_per_column;
-
-    logger::info(jungle_map_file + " contains " + std::to_string(total_tiles) +  " tiles");
-
-    int max_row = 0;
-    int max_column = 0;
-
-    while (!file.eof()) {
-        std::string line;
-        if (!std::getline(file, line)) {
-            break;
-        }
-        logger::info("read map line " + line);
-        std::vector<std::string> tokens;
-        boost::split(tokens, line, boost::is_any_of(","));
-        logger::info("line contains " + std::to_string(tokens.size()) + " tokens");
-        for (const auto& token : tokens) {
-            if (token.size() != 2) {
-                logger::error("unexpected token " + token + " does not have 2 characters");
-                continue;
-            }
-            int x = std::atoi(token.substr(1, 1).c_str());
-            int y = std::atoi(token.substr(0, 1).c_str());
-
-            if (x >= tiles_per_row) {
-                logger::error("column " + std::to_string(x) + " > tiles per row " + std::to_string(tiles_per_row));
-                continue;
-            }
-
-            if (y >= tiles_per_column) {
-                logger::error("row " + std::to_string(y) + " > tiles per column " + std::to_string(tiles_per_column));
-                continue;
-            }
-        
-            ecs::entity tile = m_registry.create_entity();
-            tile.group("tiles");
-            tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
-            tile.add_component<ecs::sprite_component>("jungle-image", tile_size, tile_size, 0, false, x * tile_size, y * tile_size);
-
-            column += 1;
-        }
-
-        if (column > max_column) {
-            max_column = column;
-        }
-
-        column = 0;
-        row += 1;
-
-        if (row > max_row) {
-            max_row = row;
-        }
-    }
-
-    s_map_width = max_column * tile_size * tile_scale;
-    s_map_height = max_row * tile_size * tile_scale;
-    
-    ecs::entity chopper = m_registry.create_entity();
-    chopper.tag("player");
-    chopper.add_component<ecs::transform_component>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 00.0));
-    chopper.add_component<ecs::sprite_component>("chopper-image", tile_size, tile_size, 1);
-    chopper.add_component<ecs::animation_component>(2, 15, true);
-    chopper.add_component<ecs::keyboard_control_component>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
-    chopper.add_component<ecs::camera_follow_component>();
-    chopper.add_component<ecs::health_component>(100);
-    chopper.add_component<ecs::projectile_emitter_component>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
-    chopper.add_component<ecs::box_collider_component>(32, 32);
-
-    ecs::entity radar = m_registry.create_entity();
-    radar.add_component<ecs::transform_component>(glm::vec2(s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
-    radar.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    radar.add_component<ecs::sprite_component>("radar-image", tile_size * 2, tile_size * 2, 2, true);
-    radar.add_component<ecs::animation_component>(8, 5, true);
-
-    ecs::entity tank = m_registry.create_entity();
-    tank.group("enemies");
-    tank.add_component<ecs::transform_component>(glm::vec2(500.0, 400.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.add_component<ecs::rigid_body_component>(glm::vec2(20.0, 0.0));
-    tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
-    tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    tank.add_component<ecs::projectile_emitter_component>(glm::vec2(100, 0.0), 5000, 10000, 10, false);
-    tank.add_component<ecs::health_component>(100);
-
-    ecs::entity truck = m_registry.create_entity();
-    truck.group("enemies");
-    truck.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    truck.add_component<ecs::sprite_component>("truck-image", tile_size, tile_size, 1);
-    truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 10000, 10, false);
-    truck.add_component<ecs::health_component>(100);
-
-    ecs::entity tree_a = m_registry.create_entity();
-    tree_a.group("obstacles");
-    tree_a.add_component<ecs::transform_component>(glm::vec2(600.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
-    tree_a.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    tree_a.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
-    tree_a.add_component<ecs::box_collider_component>(16, 32);
-
-    ecs::entity tree_b = m_registry.create_entity();
-    tree_b.group("obstacles");
-    tree_b.add_component<ecs::transform_component>(glm::vec2(400.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
-    tree_b.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    tree_b.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
-    tree_b.add_component<ecs::box_collider_component>(16, 32);
-
-    ecs::entity label = m_registry.create_entity();
-    SDL_Color green = {0, 255, 0};
-    label.add_component<ecs::text_label_component>(glm::vec2(s_window_width / 2 - 40, 10), "CHOPPER 1.0", "charriot-font", green);
-}
-
-void game::setup()
-{
-    load_level(1);
+    level_loader loader;
+    m_lua.open_libraries(sol::lib::base, sol::lib::math);
+    loader.load_level(m_lua, m_registry, m_asset_store, m_renderer, 1);
 }
 
 void game::update()

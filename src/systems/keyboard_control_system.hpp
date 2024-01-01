@@ -7,6 +7,7 @@
 #include "../logger.hpp"
 #include "../event_bus/event_bus.hpp"
 #include "../events/key_pressed_event.hpp"
+#include "../components/keyboard_control_component.hpp"
 
 namespace dge 
 {
