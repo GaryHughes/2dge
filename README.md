@@ -6,7 +6,7 @@ This is my implementation of the [Pikuma 2D Game Engine with C++ and Lua](https:
 * I used a coding style I prefer.
 * I diverged from the example implementation is small ways like the use of pointers and some numeric types. 
 
-I initially made quite a few changes but ended up just following along until I complete the course because I wanted to learned the patterns etc and the rest can be cleaned up later.
+I initially made quite a few changes but ended up just following along until I complete the course because I wanted to learn the patterns etc and the rest can be cleaned up later.
 
 # Building
 
