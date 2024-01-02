@@ -14,6 +14,11 @@ struct script_component
     :   function(f)
     {
     }
+
+    ~script_component()
+    {
+        function = sol::function();
+    }
 };
 
 }
