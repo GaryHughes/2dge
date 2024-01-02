@@ -138,7 +138,7 @@ void game::setup()
     m_registry.add_system<render_gui_system>();
 
     level_loader loader;
-    m_lua.open_libraries(sol::lib::base, sol::lib::math);
+    m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
     loader.load_level(m_lua, m_registry, m_asset_store, m_renderer, 1);
 }
 

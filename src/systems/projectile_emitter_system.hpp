@@ -110,7 +110,11 @@ public:
                     projectile_position.x += transform.scale.x * sprite.width / 2;
                     projectile_position.y += transform.scale.y * sprite.height / 2; 
                 }
+                else {
+                    logger::error("projectile emitter " + std::to_string(entity.id()) + " does not have a sprite component");
+                }
                 ecs::entity projectile = registry.create_entity();
+                logger::info("projectile emitter " + std::to_string(entity.id()) + " emitting projectile " + std::to_string(projectile.id()));
                 projectile.group("projectiles");
                 projectile.add_component<ecs::transform_component>(projectile_position, glm::vec2(1.0, 1.0), 0.0);
                 projectile.add_component<ecs::rigid_body_component>(emitter.projectile_velocity);

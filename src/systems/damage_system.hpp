@@ -70,7 +70,9 @@ public:
             auto& health = player.get_component<ecs::health_component>();
             health.health_percentage -= projectile_component.hit_percentage;
             if (health.health_percentage <= 0) {
-                player.destroy();
+                auto sprite = projectile.get_component<ecs::sprite_component>();
+                //logger::error("destroying player, enemy: " + std::to_string(projectile.id()) + " sprite: " + sprite.asset_id);
+                //player.destroy();
             }
             projectile.destroy();
         }

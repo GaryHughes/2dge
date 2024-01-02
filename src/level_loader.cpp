@@ -44,7 +44,12 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
 
     lua.script_file(filename);
 
-    sol::table level = lua["level"];
+    sol::optional<sol::table> level = lua["Level"];
+
+    if (!level.has_value()) {
+        logger::error("file " + filename + " doesn't contain a Level table");
+        return;
+    }
     
     //
     // assets = {
@@ -52,7 +57,7 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
     //      { type = "texture", id = "bullet-texture", file = "../../assets/images/bullet.png" },
     //      { type = "font", id = "charriot-font-20", file = "../../assets/fonts/charriot.ttf", font_size = 20 },
     //
-    sol::table level_assets = level["assets"];
+    sol::table level_assets = (*level)["assets"];
     for (int index = 0; ; ++index) {
         sol::optional<sol::table> asset = level_assets[index];
         if (!asset.has_value()) {
@@ -79,12 +84,13 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
     //     tile_size = 32,
     //     scale = 2.0
     // },
-    sol::table tilemap = level["tilemap"];
+    sol::table tilemap = (*level)["tilemap"];
+    std::string texture_asset_id = tilemap["texture_asset_id"];
     std::string map_file = tilemap["map_file"];
     int tile_size = tilemap["tile_size"];
     double tile_scale = tilemap["scale"];
 
-    auto tilemap_texture = assets.get_texture("tilemap-texture");
+    auto tilemap_texture = assets.get_texture(texture_asset_id);
     SDL_Point size;
     SDL_QueryTexture(tilemap_texture, NULL, NULL, &size.x, &size.y);
     
@@ -135,7 +141,7 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
             ecs::entity tile = registry.create_entity();
             tile.group("tiles");
             tile.add_component<ecs::transform_component>(glm::vec2(column * (tile_size * tile_scale), row * (tile_size * tile_scale)), glm::vec2(tile_scale, tile_scale), 0.0);
-            tile.add_component<ecs::sprite_component>("tilemap-texture", tile_size, tile_size, 0, false, x * tile_size, y * tile_size);
+            tile.add_component<ecs::sprite_component>(texture_asset_id, tile_size, tile_size, 0, false, x * tile_size, y * tile_size);
 
             column += 1;
         }
@@ -154,7 +160,7 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
 
     game::s_map_width = max_column * tile_size * tile_scale;
     game::s_map_height = max_row * tile_size * tile_scale;
-
+  
     //
     // entities = {
     //     [0] =
@@ -168,7 +174,7 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
     //             },
     //
     logger::info("loading entities");
-    sol::table level_entities = level["entities"];
+    sol::table level_entities = (*level)["entities"];
     for (int index = 0; ; ++index) {
         
         sol::optional<sol::table> entity_definition = level_entities[index];
@@ -240,7 +246,8 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
         // },
         sol::optional<sol::table> sprite = (*components)["sprite"];
         if (sprite.has_value()) {
-            logger::info("adding sprite component");
+            std::string asset_id = (*sprite)["texture_asset_id"];
+            logger::info("adding sprite component to entity: " + std::to_string(entity.id()) + " asset: " + asset_id);
             entity.add_component<ecs::sprite_component>(
                 (*sprite)["texture_asset_id"],
                 (*sprite)["width"],
@@ -309,8 +316,8 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
                     (*projectile_emitter)["projectile_velocity"]["x"].get_or(0),
                     (*projectile_emitter)["projectile_velocity"]["y"].get_or(0)
                 ),
-                (*projectile_emitter)["repeat_frequency"].get_or(1000),
-                (*projectile_emitter)["projectile_duration"].get_or(10000),
+                (*projectile_emitter)["repeat_frequency"].get_or(1) * 1000,
+                (*projectile_emitter)["projectile_duration"].get_or(10) * 1000,
                 (*projectile_emitter)["hit_percentage_damage"].get_or(10),
                 (*projectile_emitter)["friendly"].get_or(false)
             );

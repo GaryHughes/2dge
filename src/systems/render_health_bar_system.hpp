@@ -60,7 +60,7 @@ public:
 
             std::string health_text = std::to_string(health.health_percentage);
 
-            auto font = assets.get_font("charriot-font-5");
+            auto font = assets.get_font("pico8-font-5");
 
             if (!font) {
                 logger::error("FAILED TO LOAD FONT");
