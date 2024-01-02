@@ -54,7 +54,7 @@ public:
                 const int tile_size = 32;
                 tank.add_component<ecs::transform_component>(glm::vec2(enemy_x_position, enemy_y_position), glm::vec2(1.0, 1.0), 0.0);
                 tank.add_component<ecs::rigid_body_component>(glm::vec2(enemy_x_velocity, enemy_y_velocity));
-                tank.add_component<ecs::sprite_component>("tank-image", tile_size, tile_size, 1);
+                tank.add_component<ecs::sprite_component>("tank-tiger-right-texture", tile_size, tile_size, 1);
                 tank.add_component<ecs::box_collider_component>(tile_size, tile_size);
                 tank.add_component<ecs::projectile_emitter_component>(glm::vec2(projectile_x_velocity, 
                                                                       projectile_y_velocity), 
