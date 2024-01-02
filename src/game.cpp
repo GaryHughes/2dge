@@ -52,6 +52,11 @@ void game::initialise()
         return;
     }
 
+    SDL_DisplayMode displayMode;
+    SDL_GetCurrentDisplayMode(0, &displayMode);
+    s_window_width = displayMode.w;
+    s_window_height = displayMode.h;
+
     m_window = SDL_CreateWindow(nullptr, 
                                 SDL_WINDOWPOS_CENTERED, 
                                 SDL_WINDOWPOS_CENTERED, 
