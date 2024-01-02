@@ -13,6 +13,7 @@
 #include "systems/render_text_system.hpp"
 #include "systems/render_health_bar_system.hpp"
 #include "systems/render_gui_system.hpp"
+#include "systems/script_system.hpp"
 #include "level_loader.hpp"
 #include <iostream>
 #include <SDL2/SDL_image.h>
@@ -136,6 +137,9 @@ void game::setup()
     m_registry.add_system<render_text_system>();
     m_registry.add_system<render_health_bar_system>();
     m_registry.add_system<render_gui_system>();
+    m_registry.add_system<script_system>();
+
+    m_registry.get_system<script_system>().create_lua_bindings(m_lua);
 
     level_loader loader;
     m_lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
@@ -168,6 +172,7 @@ void game::update()
     m_registry.get_system<projectile_emitter_system>().update(m_registry);
     m_registry.get_system<camera_movement_system>().update(m_camera);
     m_registry.get_system<projectile_lifecycle_system>().update();
+    m_registry.get_system<script_system>().update(delta_time, SDL_GetTicks());
 }
 
 void game::render()

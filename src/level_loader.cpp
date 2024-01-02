@@ -10,6 +10,7 @@
 #include "components/projectile_emitter_component.hpp"
 #include "components/health_component.hpp"
 #include "components/text_label_component.hpp"
+#include "components/script_component.hpp"
 #include "game.hpp"
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
@@ -157,6 +158,9 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
             max_row = row;
         }
     }
+
+    // game::s_map_width = int((*level)["map_width"]);
+    // game::s_map_height = int((*level)["map_height"]);
 
     game::s_map_width = max_column * tile_size * tile_scale;
     game::s_map_height = max_row * tile_size * tile_scale;
@@ -359,42 +363,22 @@ void level_loader::load_level(sol::state& lua, ecs::registry& registry, asset_st
         if (camera_follow.has_value() && (*camera_follow)["follow"].get_or(false)) {
             logger::info("adding camera_follow component");
             entity.add_component<ecs::camera_follow_component>();
-        }   
+        } 
+
+        // on_update_script = {
+        //     [0] =
+        //     function(entity, delta_time, ellapsed_time)
+        sol::optional<sol::table> update_script = (*components)["on_update_script"];
+        if (update_script.has_value()) {
+            logger::info("adding script component");
+            sol::function function = (*update_script)[0];
+            entity.add_component<ecs::script_component>(function);
+        }
     }
     
-    // ecs::entity radar = registry.create_entity();
-    // radar.add_component<ecs::transform_component>(glm::vec2(game::s_window_width - 74, 10), glm::vec2(1.0, 1.0), 0.0);
-    // radar.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    // radar.add_component<ecs::sprite_component>("radar-texture", tile_size * 2, tile_size * 2, 2, true);
-    // radar.add_component<ecs::animation_component>(8, 5, true);
-
-    // ecs::entity truck = registry.create_entity();
-    // truck.group("enemies");
-    // truck.add_component<ecs::transform_component>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    // truck.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    // truck.add_component<ecs::sprite_component>("truck-texture", tile_size, tile_size, 1);
-    // truck.add_component<ecs::box_collider_component>(tile_size, tile_size);
-    // truck.add_component<ecs::projectile_emitter_component>(glm::vec2(0.0, 100), 2000, 10000, 10, false);
-    // truck.add_component<ecs::health_component>(100);
-
-    // ecs::entity tree_a = registry.create_entity();
-    // tree_a.group("obstacles");
-    // tree_a.add_component<ecs::transform_component>(glm::vec2(600.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
-    // tree_a.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    // tree_a.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
-    // tree_a.add_component<ecs::box_collider_component>(16, 32);
-
-    // ecs::entity tree_b = registry.create_entity();
-    // tree_b.group("obstacles");
-    // tree_b.add_component<ecs::transform_component>(glm::vec2(400.0, 395.0), glm::vec2(1.0, 1.0), 0.0);
-    // tree_b.add_component<ecs::rigid_body_component>(glm::vec2(0.0, 0.0));
-    // tree_b.add_component<ecs::sprite_component>("tree-image", 16, 32, 1);
-    // tree_b.add_component<ecs::box_collider_component>(16, 32);
-
     // ecs::entity label = registry.create_entity();
     // SDL_Color green = {0, 255, 0};
     // label.add_component<ecs::text_label_component>(glm::vec2(game::s_window_width / 2 - 40, 10), "CHOPPER 1.0", "charriot-font", green);
-    
 }
 
 }

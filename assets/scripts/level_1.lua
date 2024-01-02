@@ -2753,13 +2753,12 @@ Level = {
                 }
             }
         },
-        --[[
         {
             -- SU-27 fighter jet
             group = "enemies",
             components = {
                 transform = {
-                    position = { x = 317, y = 985 },
+                    position = { x = 317, y = 485 },
                     scale = { x = 1.0, y = 1.0 },
                     rotation = 0.0, -- degrees
                 },
@@ -2793,8 +2792,6 @@ Level = {
                 on_update_script = {
                     [0] =
                     function(entity, delta_time, ellapsed_time)
-                        -- print("Executing the SU-27 fighter jet Lua script!")
-
                         -- this function makes the fighter jet move up and down the map shooting projectiles
                         local current_position_x, current_position_y = get_position(entity)
                         local current_velocity_x, current_velocity_y = get_velocity(entity)
@@ -2857,8 +2854,6 @@ Level = {
                 on_update_script = {
                     [0] =
                     function(entity, delta_time, ellapsed_time)
-                        -- print("Executing BF-109 Lua script!")
-
                         -- change the position of the the airplane to follow a sine wave movement
                         local new_x = ellapsed_time * 0.09
                         local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
@@ -2867,7 +2862,6 @@ Level = {
                 }
             }
         }
-        --]]
     }
 }
 
