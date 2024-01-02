@@ -62,7 +62,7 @@ public:
         return a_x < b_x + b_w &&
                a_x + a_w > b_x &&
                a_y < b_y + b_h &&
-               a_y + a_h > b_h;
+               a_y + a_h > b_y;
     }
 };
 
